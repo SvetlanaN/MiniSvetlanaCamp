@@ -7,5 +7,5 @@ class Task < ApplicationRecord
   validates :title, presence: true
   validates :description, presence: true
   validates :status, presence: true
-  validates :deadline, presence: true
+  validates :project_id, presence: true
 end
