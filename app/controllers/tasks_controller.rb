@@ -4,9 +4,9 @@ class TasksController < ApplicationController
   # GET /tasks or /tasks.json
   def index
     if params[:projectId]
-      @tasks = Task.where(project_id: params[:projectId])
+      @tasks = current_user.tasks.where(project_id: params[:projectId])
     else
-      @tasks = Task.all
+      @tasks = current_user.tasks
     end
   end
 
@@ -64,7 +64,19 @@ class TasksController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_task
-      @task = Task.find(params[:id])
+      @task = current_user.tasks.find_by(id: params[:id])
+
+      unless @task
+        flash[:error] = "The task doesn't exist or you don't have access to it"
+        redirect_to projects_path
+      end
+    end
+
+    def require_login
+      unless current_user
+        flash[:error] = "You must be logged in to access this section"
+        redirect_to login_path
+      end
     end
 
     # Only allow a list of trusted parameters through.

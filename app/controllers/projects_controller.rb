@@ -1,9 +1,10 @@
 class ProjectsController < ApplicationController
+  before_action :require_login
   before_action :set_project, only: %i[ show edit update destroy ]
 
   # GET /projects or /projects.json
   def index
-    @projects = Project.all
+    @projects = current_user.projects
   end
 
   # GET /projects/1 or /projects/1.json
@@ -60,7 +61,19 @@ class ProjectsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_project
-      @project = Project.find(params[:id])
+      @project = current_user.projects.find_by(id: params[:id])
+
+      unless @project
+        flash[:error] = "The project doesn't exist or you don't have access to it"
+        redirect_to projects_path
+      end
+    end
+
+    def require_login
+      unless current_user
+        flash[:error] = "You must be logged in to access this section"
+        redirect_to login_path
+      end
     end
 
     # Only allow a list of trusted parameters through.
