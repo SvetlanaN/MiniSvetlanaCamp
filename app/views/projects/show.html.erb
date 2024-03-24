@@ -3,7 +3,9 @@
 <%= render @project %>
 
 <div>
-  <%= link_to "Edit this project", edit_project_path(@project) %> |
+  <% if current_user.project_memberships.find_by(project_id: @project.id)&.role_type.in?(%w(admin editor)) %>
+    <%= link_to "Edit this project", edit_project_path(@project) %> |
+  <% end %>
   <%= link_to "Show tasks in this project", tasks_path(projectId: @project.id) %> |
   <%= link_to "Back to projects", projects_path %>
 

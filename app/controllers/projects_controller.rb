@@ -1,6 +1,8 @@
 class ProjectsController < ApplicationController
   before_action :require_login
   before_action :set_project, only: %i[ show edit update destroy ]
+  before_action :check_project_membership, only: %i[ show edit update destroy ]
+  before_action :check_project_permission, only: %i[ edit update destroy ]
 
   # GET /projects or /projects.json
   def index
@@ -23,6 +25,7 @@ class ProjectsController < ApplicationController
   # POST /projects or /projects.json
   def create
     @project = Project.new(project_params)
+    @project.project_memberships.build(user: current_user, role_type: :admin)
 
     respond_to do |format|
       if @project.save
@@ -61,17 +64,26 @@ class ProjectsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_project
-      @project = current_user.projects.find_by(id: params[:id])
+      @project = Project.find_by(id: params[:id])
+    end
 
-      unless @project
-        flash[:error] = "The project doesn't exist or you don't have access to it"
+    def check_project_membership
+      unless @project && @project.users.include?(current_user)
+        flash[:error] = "The project doesn't exist or you don't have access to it."
         redirect_to projects_path
+      end
+    end
+
+    def check_project_permission
+      unless current_user.has_role?(:sys_admin) || current_user.project_memberships.find_by(project: @project, role_type: [:admin, :editor])
+        flash[:error] = "You don't have permission to perform this action."
+        redirect_to project_path(@project)
       end
     end
 
     def require_login
       unless current_user
-        flash[:error] = "You must be logged in to access this section"
+        flash[:error] = "You must be logged in to access this section."
         redirect_to login_path
       end
     end

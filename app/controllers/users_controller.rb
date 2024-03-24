@@ -18,7 +18,6 @@ class UsersController < ApplicationController
 
   # GET /users/1/edit
   def edit
-    # Only allow the user themselves or users with sys_admin role to edit
     unless current_user == @user || current_user.has_role?(:sys_admin)
       redirect_to root_path, alert: "You don't have permission to perform this action."
     end
@@ -41,7 +40,6 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/1 or /users/1.json
   def update
-    # Only allow the user themselves or users with sys_admin role to update
     if current_user == @user || current_user.has_role?(:sys_admin)
       respond_to do |format|
         if @user.update(user_params)
@@ -59,7 +57,6 @@ class UsersController < ApplicationController
 
   # DELETE /users/1 or /users/1.json
   def destroy
-    # Only allow the user themselves or users with sys_admin role to delete
     if current_user == @user || current_user.has_role?(:sys_admin)
       @user.destroy
       respond_to do |format|
@@ -83,7 +80,6 @@ class UsersController < ApplicationController
     params.require(:user).permit(:name, :email, :password)
   end
 
-  # Ensure user is logged in
   def require_login
     unless current_user
       redirect_to login_path, alert: "You must be logged in to access this section."

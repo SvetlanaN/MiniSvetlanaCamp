@@ -1,10 +1,12 @@
 class TasksController < ApplicationController
-  before_action :set_task, only: %i[ show edit update destroy ]
+  before_action :require_login
+  before_action :set_task, only: %i[show edit update destroy]
 
   # GET /tasks or /tasks.json
   def index
     if params[:projectId]
-      @tasks = current_user.tasks.where(project_id: params[:projectId])
+      project = current_user.projects.find_by(id: params[:projectId])
+      @tasks = project.tasks if project
     else
       @tasks = current_user.tasks
     end
@@ -62,25 +64,33 @@ class TasksController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_task
-      @task = current_user.tasks.find_by(id: params[:id])
+  # Use callbacks to share common setup or constraints between actions.
+  def set_task
+    @task = Task.find_by(id: params[:id])
+    unless @task && current_user.projects.exists?(@task.project_id)
+      flash[:error] = "The task doesn't exist or you don't have access to it"
+      redirect_to projects_path
+    end
+  end
 
-      unless @task
-        flash[:error] = "The task doesn't exist or you don't have access to it"
-        redirect_to projects_path
+  def require_login
+    unless current_user
+      flash[:error] = "You must be logged in to access this section"
+      redirect_to login_path
+    end
+  end
+
+  # Only allow a list of trusted parameters through.
+  def task_params
+    # Ensure that the assigned_to_id belongs to a user who is an admin or an editor of the project
+    params.require(:task).permit(:title, :description, :deadline, :status, :project_id, :assigned_to_id).tap do |whitelisted|
+      project = Project.find_by(id: whitelisted[:project_id])
+      if project
+        assigned_to_id = whitelisted[:assigned_to_id]
+        unless project.admins.exists?(assigned_to_id) || project.editors.exists?(assigned_to_id)
+          whitelisted[:assigned_to_id] = nil
+        end
       end
     end
-
-    def require_login
-      unless current_user
-        flash[:error] = "You must be logged in to access this section"
-        redirect_to login_path
-      end
-    end
-
-    # Only allow a list of trusted parameters through.
-    def task_params
-      params.require(:task).permit(:title, :description, :deadline, :status, :project_id, :assigned_to_id)
-    end
+  end
 end
