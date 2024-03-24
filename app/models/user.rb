@@ -21,6 +21,10 @@ class User < ApplicationRecord
     super || []
   end
 
+  def has_role?(role)
+    roles.include?(role.to_s)
+  end
+
   private
 
   def validate_roles
