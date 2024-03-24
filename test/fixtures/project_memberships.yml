@@ -1,0 +1,4 @@
+project_membership1:
+  user: user1
+  project: project1
+  role_type: admin

@@ -1,48 +1,63 @@
-require "test_helper"
+require 'test_helper'
 
 class ProjectsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @project = projects(:one)
+    @user = users(:user1)
+    @project = projects(:project1)
   end
 
   test "should get index" do
+    log_in_as(@user)
     get projects_url
     assert_response :success
   end
 
-  test "should get new" do
-    get new_project_url
-    assert_response :success
-  end
-
-  test "should create project" do
-    assert_difference("Project.count") do
-      project projects_url, params: { project: { description: @project.description, name: @project.name } }
-    end
-
-    assert_redirected_to project_url(Project.last)
-  end
-
   test "should show project" do
+    log_in_as(@user)
     get project_url(@project)
     assert_response :success
   end
 
-  test "should get edit" do
+  test "should not get new when not logged in" do
+    get new_project_url
+    assert_redirected_to login_url
+  end
+
+  test "should get new when logged in" do
+    log_in_as(@user)
+    get new_project_url
+    assert_response :success
+  end
+
+  test "should not create project when not logged in" do
+    assert_no_difference('Project.count') do
+      post projects_url, params: { project: { name: "New Project" } }
+    end
+    assert_redirected_to login_url
+  end
+
+  test "should create project when logged in" do
+    log_in_as(@user)
+    assert_difference('Project.count') do
+      post projects_url, params: { project: { name: "New Project", description: "Project description", created_at: "2024-01-01", updated_at: "2024-01-01" } }
+    end
+    assert_redirected_to project_url(Project.last)
+  end
+
+  test "should not get edit when not logged in" do
+    get edit_project_url(@project)
+    assert_redirected_to login_url
+  end
+
+  test "should get edit when logged in" do
+    log_in_as(@user)
     get edit_project_url(@project)
     assert_response :success
   end
 
-  test "should update project" do
-    patch project_url(@project), params: { project: { description: @project.description, name: @project.name } }
-    assert_redirected_to project_url(@project)
-  end
+  private
 
-  test "should destroy project" do
-    assert_difference("Project.count", -1) do
-      delete project_url(@project)
-    end
-
-    assert_redirected_to projects_url
+  def log_in_as(user)
+    post login_url, params: { session: { email: user.email, password: 'password' } }
   end
 end

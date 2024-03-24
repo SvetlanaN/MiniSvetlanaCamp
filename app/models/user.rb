@@ -7,7 +7,7 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   has_secure_password
 
-  serialize :roles, JSON
+  serialize :roles, coder: JSON
 
   ROLES = ['sys_admin'].freeze # Currently only sys_admin role is supported
 
