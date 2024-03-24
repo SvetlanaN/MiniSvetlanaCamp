@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_22_082252) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_24_102858) do
   create_table "project_memberships", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "project_id", null: false
@@ -49,6 +49,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_22_082252) do
     t.string "password_digest", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "roles", default: ""
   end
 
   add_foreign_key "project_memberships", "projects"

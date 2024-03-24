@@ -1,3 +1,10 @@
+# Clear existing data
+ProjectMembership.destroy_all
+Task.destroy_all
+Project.destroy_all
+User.destroy_all
+
+# Create new data
 # Creating example projects
 project1 = Project.create(name: "Project 1", description: "Description for Project 1", start_date: Date.today, end_date: Date.today + 30.days)
 project2 = Project.create(name: "Project 2", description: "Description for Project 2", start_date: Date.today, end_date: Date.today + 45.days)
@@ -8,7 +15,7 @@ user1 = User.create(name: "User 1", email: "user1@example.com", password_digest:
 user2 = User.create(name: "User 2", email: "user2@example.com", password_digest: BCrypt::Password.create("password2"))
 user3 = User.create(name: "User 3", email: "user3@example.com", password_digest: BCrypt::Password.create("password3"))
 user4 = User.create(name: "User 4", email: "user4@example.com", password_digest: BCrypt::Password.create("password4"))
-user5 = User.create(name: "User 5", email: "user5@example.com", password_digest: BCrypt::Password.create("password5"))
+user5 = User.create(name: "User 5", email: "user5@example.com", password_digest: BCrypt::Password.create("password5"), roles: ['sys_admin'])
 
 # Creating project memberships
 # Project 1

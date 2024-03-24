@@ -9,4 +9,11 @@
     <%= user.email %>
   </p>
 
+  <p>
+    <strong>Roles:</strong>
+    <% user.roles.each do |role| %>
+      <%= role.titleize %>
+      <%= ", " unless role == user.roles.last %>
+    <% end %>
+  </p>
 </div>
